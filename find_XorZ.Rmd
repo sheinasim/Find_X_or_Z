@@ -58,7 +58,15 @@ sed -i '1iScaffold\tIndv\tO.hom)\tE.hom)\tN\tF' $homozygositiesfile
 
 Below are R scripts to read in the single output file from above and a file you produce which contains the individual name (matching exactly with the individual name in the .vcf) and sex and appends sex information for all individuals to the augmented vcftools .het output. Additional columns are created to calculate the observed and expected heterozygosities, and observed and expected proportion heterozygosities. The last line selects only the relevant columns (Scaffold, Sex, and proportion of observed heterozygocities).
 
-```{r results = 'hide'}
+Required libraries:
+
+* tidyverse
+* plyr
+* broom
+* dplyr
+* ggplot2
+
+```{r message = F}
 sexes <- read_tsv("Sex_Chr/Test/indv_sex.tsv", col_names=T)
 heterozygosities <- read_tsv("Sex_Chr/Test/allhomozygosities.tsv", col_names=T) %>% 
   filter(N > 100) %>%
@@ -72,7 +80,7 @@ heterozygosities <- read_tsv("Sex_Chr/Test/allhomozygosities.tsv", col_names=T) 
 
 Below is a way to run a two-sample T test comparing the proportion of observed heterozygosities of females and males.
 
-```{r results = 'hide'}
+```{r message = F}
 data_summary <- function(data, varname, groupnames){
   require(plyr)
   summary_func <- function(x, col){
@@ -103,7 +111,7 @@ df <- df %>%
 
 Create a scatter plot using the male proportion heterozygosity and the female heterozygosity with the standard deviations as lines on the x and y axes respectively. 
 
-```{r}
+```{r fig.cap = "Average heterozygosity of males and females across all scaffolds containing biallelic SNPs. Scaffolds with a significant difference (p.value < 0.001) in average heterozygosity between males and females are in red."}
 p <- ggplot(df, aes(x = PO.het_M, y = PO.het_F, color=Significant)) + 
   geom_pointrange(aes(ymin = PO.het_F - sd_F, ymax = PO.het_F + sd_F)) +
   geom_errorbarh(aes(xmax = PO.het_M + sd_M, xmin = PO.het_M - sd_M, height = 0)) +
@@ -114,9 +122,9 @@ p <- ggplot(df, aes(x = PO.het_M, y = PO.het_F, color=Significant)) +
 p + theme(legend.title = element_blank()) 
 ```
 
-This is the same graph with the axes switched to be cute and put the male on the Y axis and the female on the X axis.
 
-```{r}
+
+```{r fig.cap = "This is the same graph as above with the axes switched to be cute and put the male on the Y axis and the female on the X axis."}
 p_switched <- ggplot(df, aes(x = PO.het_F, y = PO.het_M, color=Significant)) + 
   geom_pointrange(aes(ymin = PO.het_M - sd_M, ymax = PO.het_M + sd_M)) +
   geom_errorbarh(aes(xmax = PO.het_F + sd_F, xmin = PO.het_F - sd_F, height = 0)) +
@@ -127,7 +135,7 @@ p_switched <- ggplot(df, aes(x = PO.het_F, y = PO.het_M, color=Significant)) +
 p_switched + theme(legend.title = element_blank()) 
 ```
 
-This table show the X or Z linked scaffolds based on these analyses.
+This table shows the X or Z linked scaffolds based on these analyses.
 
 ```{r}
 XZ_linked <- df %>% 
