@@ -133,7 +133,7 @@ This table show the X or Z linked scaffolds based on these analyses.
 XZ_linked <- df %>% 
   filter(p.value <= 0.001) %>% 
   filter(PO.het_F < 0.05) %>% 
-  select(PO.het_F, PO.het_M, sd_F, sd_M, p.value, method)
+  select(Scaffold, PO.het_F, PO.het_M, sd_F, sd_M, p.value, method)
 
 XZ_linked
 ```
