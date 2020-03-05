@@ -37,7 +37,7 @@ outdir=Homozygosities
 homozygositiesfile=allhomozygosities.tsv
 
 
-if [ ! -f "$outdir" ]; then
+if [ ! -d "$outdir" ]; then
     mkdir $outdir
 fi
 
