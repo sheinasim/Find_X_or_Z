@@ -85,7 +85,7 @@ data_summary <- function(data, varname, groupnames){
   require(plyr)
   summary_func <- function(x, col){
     c(mean = mean(x[[col]], na.rm=TRUE),
-      sd = sd(x[[col]], na.rm=TRUE))
+      sem = sd(x[[col]], na.rm=TRUE)/sqrt(length(x[[col]])))
   }
   data_sum<-ddply(data, groupnames, .fun=summary_func,
                   varname)
@@ -94,7 +94,7 @@ data_summary <- function(data, varname, groupnames){
 }
 
 df <- data_summary(heterozygosities, varname = "PO.het", groupnames = c("Scaffold", "Sex")) %>% 
-  pivot_wider(id_cols = Scaffold, names_from = Sex, values_from = c("PO.het", "sd")) %>% 
+  pivot_wider(id_cols = Scaffold, names_from = Sex, values_from = c("PO.het", "sem")) %>% 
   drop_na()
 
 scaffKeepers <- df$Scaffold
@@ -107,29 +107,34 @@ est <- heterozygosities %>%
 df <- df %>% 
   inner_join(est, by = "Scaffold") %>% 
   mutate(Significant = ifelse(p.value < 0.001, "p-value < 0.001", ifelse(p.value >= 0.001, "p-value >= 0.001", "no")))
+
+df
 ```
 
 Create a scatter plot using the male proportion heterozygosity and the female heterozygosity with the standard deviations as lines on the x and y axes respectively. 
 
 ```{r fig.cap = "Average heterozygosity of males and females across all scaffolds containing biallelic SNPs. Scaffolds with a significant difference (p.value < 0.001) in average heterozygosity between males and females are in red."}
 p <- ggplot(df, aes(x = PO.het_M, y = PO.het_F, color=Significant)) + 
-  geom_pointrange(aes(ymin = PO.het_F - sd_F, ymax = PO.het_F + sd_F)) +
-  geom_errorbarh(aes(xmax = PO.het_M + sd_M, xmin = PO.het_M - sd_M, height = 0)) +
+  geom_pointrange(aes(ymin = PO.het_F - sem_F, ymax = PO.het_F + sem_F)) +
+  geom_errorbarh(aes(xmax = PO.het_M + sem_M, xmin = PO.het_M - sem_M, height = 0)) +
   labs(y="Heterozygosity (Female)", x = "Heterozygosity (Male)") + 
   scale_color_manual(values = c("#C93312", "#899DA4")) +
+  expand_limits(x = c(0,(max(df$PO.het_M)+0.05)), y = c(0,(max(df$PO.het_M)+0.05))) + 
   theme_bw()
 
 p + theme(legend.title = element_blank()) 
+
 ```
 
 
 
 ```{r fig.cap = "This is the same graph as above with the axes switched to be cute and put the male on the Y axis and the female on the X axis."}
 p_switched <- ggplot(df, aes(x = PO.het_F, y = PO.het_M, color=Significant)) + 
-  geom_pointrange(aes(ymin = PO.het_M - sd_M, ymax = PO.het_M + sd_M)) +
-  geom_errorbarh(aes(xmax = PO.het_F + sd_F, xmin = PO.het_F - sd_F, height = 0)) +
+  geom_pointrange(aes(ymin = PO.het_M - sem_M, ymax = PO.het_M + sem_M)) +
+  geom_errorbarh(aes(xmax = PO.het_F + sem_F, xmin = PO.het_F - sem_F, height = 0)) +
   labs(y="Heterozygosity (Male)", x = "Heterozygosity (Female)") + 
   scale_color_manual(values = c("#C93312", "#899DA4")) +
+  expand_limits(x = c(0,(max(df$PO.het_M)+0.05)), y = c(0,(max(df$PO.het_M)+0.05))) + 
   theme_bw()
 
 p_switched + theme(legend.title = element_blank()) 
@@ -141,7 +146,7 @@ This table shows the X or Z linked scaffolds based on these analyses.
 XZ_linked <- df %>% 
   filter(p.value <= 0.001) %>% 
   filter(PO.het_F < 0.05) %>% 
-  select(Scaffold, PO.het_F, PO.het_M, sd_F, sd_M, p.value, method)
+  select(Scaffold, PO.het_F, PO.het_M, sem_F, sem_M, p.value, method)
 
 XZ_linked
 ```
