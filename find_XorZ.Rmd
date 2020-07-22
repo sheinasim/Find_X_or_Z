@@ -56,7 +56,7 @@ done
 sed -i '1iScaffold\tIndv\tO.hom)\tE.hom)\tN\tF' $homozygositiesfile
 ```
 
-Below are R scripts to read in the single output file from above and a file you produce which contains the individual name (matching exactly with the individual name in the .vcf) and sex and appends sex information for all individuals to the augmented vcftools .het output. Additional columns are created to calculate the observed and expected heterozygosities, and observed and expected proportion heterozygosities. The last line selects only the relevant columns (Scaffold, Sex, and proportion of observed heterozygocities).
+Below are R scripts to read in the single output file from above and a file you produce which contains the individual name (matching exactly with the individual name in the .vcf) and sex and appends sex information for all individuals to the augmented vcftools .het output. Additional columns are created to calculate the observed and expected heterozygosities, and observed and expected proportion heterozygosities. The last line selects only the relevant columns (Scaffold, Sex, and proportion of observed heterozygosities).
 
 Required libraries:
 
